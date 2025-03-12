@@ -88,7 +88,7 @@ function feedback_pdf_save_pdf($responses, $userid, $pdffile, $filename)
     global $DB;
 
     $rec = new stdClass();
-    $rec->name = $responses[0]["data"]->name;
+    $rec->name = $responses[0]["feedback"]->name;
     $rec->feedbackid = $responses[0]["feedback"]->id;
     $rec->recordid = $responses[0]["record"]->id;
     $rec->userid = $userid;
@@ -153,13 +153,11 @@ function feedback_pdf_get_responses($ids)
         }
 
         // Get feedback response
+        $iscompleted = false;
         $params = array('userid' => $USER->id, 'feedback' => $feedback->id);
-        $record = $DB->get_record('feedback_completed', $params);
-
-        // Viewing individual response.
-        $feedbackstructure = new mod_feedback_completion($feedback, $cm, 0, true, $record->id, false);
-        $form = new mod_feedback_complete_form(mod_feedback_complete_form::MODE_VIEW_RESPONSE,
-        $feedbackstructure, 'feedback_viewresponse_form');
+        if ($record = $DB->get_record('feedback_completed', $params)) {
+            $iscompleted = true;
+        }
 
         $responses = array();
 
@@ -167,6 +165,11 @@ function feedback_pdf_get_responses($ids)
             // don't append
             continue;
         }
+
+        // Viewing individual response.
+        $feedbackstructure = new mod_feedback_completion($feedback, $cm, 0, $iscompleted, $record->id ?? null, null, $USER->id);
+        $form = new mod_feedback_complete_form(mod_feedback_complete_form::MODE_VIEW_RESPONSE,
+        $feedbackstructure, 'feedback_viewresponse_form');
 
         foreach ($feedbackstructure->get_items() as $key => $item) {
             if (in_array($item->typ, array('label', 'captcha', 'pagebreak'))) {
