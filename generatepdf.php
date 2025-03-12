@@ -77,6 +77,6 @@ foreach ($responses as $act) {
 }
 
 $pdffile = tempnam('', 'feedbackpdf').".pdf";
-$pdf = new \Spipu\Html2Pdf\Html2Pdf('P', 'Letter', 'en', true, 'UTF-8', array(7, 7, 7, 7));
+$pdf = new Html2Pdf('P', 'Letter', 'en', true, 'UTF-8', array(7, 7, 7, 7));
 $pdf->writeHTML($html);
 $pdf->output($pdffile, 'F');

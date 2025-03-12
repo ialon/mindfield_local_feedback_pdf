@@ -23,6 +23,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die();
+
 define("FEEDBACK_PDF_TIMEFORMAT", "M d, y h:iA");
 
 require_once(dirname(__FILE__) . '/../../config.php');
@@ -74,6 +75,7 @@ function feedback_pdf_send_pdf($filename, $type, $pdffile)
     }
     flush();
 }
+
 /**
  * Save response PDF to database
  *
@@ -135,7 +137,7 @@ function feedback_pdf_init($id) {
  * @param int $ids comma delimited list of data activity IDs
  * @return array
  */
-function feedback_pdf_get_data_responses($ids)
+function feedback_pdf_get_responses($ids)
 {
     global $DB, $USER, $PAGE;
 

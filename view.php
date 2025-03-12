@@ -23,7 +23,6 @@
  */
 
 require_once(dirname(__FILE__) . '/../../config.php');
-require_once($CFG->dirroot . '/mod/data/locallib.php');
 require_once('lib.php');
 
 require_login();
@@ -31,13 +30,13 @@ require_login();
 $mode   = optional_param('mode', '', PARAM_ALPHA);
 $submit = optional_param('submit', 0, PARAM_INT);
 
+$id         = required_param('id', PARAM_SEQUENCE);      // IDs of exercise activities
+$activityid = required_param('activityid', PARAM_INT);   // ID of this activity (to mark completion against)
+
 /****************************************************************************/
 if ($mode == 'preview' || $mode == 'save') {
 /****************************************************************************/
-    $id         = required_param('id', PARAM_SEQUENCE);      // IDs of exercise activities
-    $activityid = required_param('activityid', PARAM_INT);   // ID of this activity (to mark completion against)
-
-    $responses  = feedback_pdf_get_data_responses($id);
+    $responses  = feedback_pdf_get_responses($id);
     $pdffile    = feedback_pdf_generate_pdf($responses);
     $filename   = "Feedback PDF Report {$responses[0]['name']}.pdf";
 
@@ -60,9 +59,6 @@ if ($mode == 'preview' || $mode == 'save') {
 /****************************************************************************/
 } else {
 /****************************************************************************/
-    $id         = required_param('id', PARAM_SEQUENCE);     // IDs of exercise activities
-    $activityid = required_param('activityid', PARAM_INT);  // ID of this activity (to mark completion against)
-
     $savelabel  = ($submit == 1) ? 'Save &amp; Submit' : 'Save';
     $saveprompt = ($submit == 1) ? 'Save &amp; submit results to your permanent record?' : 'Save results to your permanent record?';
 
@@ -79,7 +75,7 @@ if ($mode == 'preview' || $mode == 'save') {
     echo $OUTPUT->heading("Exercise Results");
 
     $myurl = new moodle_url('/local/feedback_pdf/view.php', array('id'=>$id, 'activityid'=>$activityid));
-    $responses = feedback_pdf_get_data_responses($id);
+    $responses = feedback_pdf_get_responses($id);
 
     $table = new html_table();
     $table->head = array('',  'Action');
@@ -87,7 +83,7 @@ if ($mode == 'preview' || $mode == 'save') {
     $table->data = array();
     if ($record = $responses[0]['record']) {
         $table->data[] =  array(
-            "Current exercise results. Please Save to mark this course as Complete.",
+            "Current results. Please Save to mark this course as Complete.",
             '<a target="pdf" href="'.$myurl.'&mode=preview">Preview</a>'
                 .' | <a href="'.$myurl.'&mode=save" onClick="return confirm(\''.addslashes($saveprompt).'\')">'.$savelabel.'</a>'
         );
