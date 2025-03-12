@@ -95,8 +95,8 @@ if ($mode == 'preview' || $mode == 'save') {
     $table->head = array('Saved Documents', 'Date', 'Download');
     $table->align = array("left", "left", "right");
     $table->data = array();
-    $dataid = $responses[0]['data']->id;
-    $dbrecs = $DB->get_records('feedback_pdf', array('userid'=>$USER->id, 'dataid'=>$dataid), 'id desc', 'id, name, timecreated');
+    $feedbackid = $responses[0]['feedback']->id;
+    $dbrecs = $DB->get_records('feedback_pdf', array('userid'=>$USER->id, 'feedbackid'=>$feedbackid), 'id desc', 'id, name, timecreated');
     foreach ($dbrecs as $rec) {
         $pdfurl = $docurl.'?id='.$rec->id;
         $table->data[] =  array(

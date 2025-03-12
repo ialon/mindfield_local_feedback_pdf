@@ -7,7 +7,7 @@
     <TABLE NAME="feedback_pdf" COMMENT="Feedback PDF">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="dataid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="feedbackid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="recordid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -19,8 +19,8 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="dataid" UNIQUE="false" FIELDS="dataid"/>
-        <INDEX NAME="recordid" UNIQUE="false" FIELDS="dataid"/>
+        <INDEX NAME="feedbackid" UNIQUE="false" FIELDS="feedbackid"/>
+        <INDEX NAME="recordid" UNIQUE="false" FIELDS="recordid"/>
         <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
       </INDEXES>
     </TABLE>

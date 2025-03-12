@@ -90,7 +90,7 @@ function feedback_pdf_save_pdf($responses, $userid, $pdffile, $filename)
 
     $rec = new stdClass();
     $rec->name = $responses[0]["data"]->name;
-    $rec->dataid = $responses[0]["data"]->id;
+    $rec->feedbackid = $responses[0]["feedback"]->id;
     $rec->recordid = $responses[0]["record"]->id;
     $rec->userid = $userid;
     $rec->timecreated = $responses[0]["record"]->timecreated;
@@ -101,9 +101,9 @@ function feedback_pdf_save_pdf($responses, $userid, $pdffile, $filename)
 }
 
 /**
- * Initialize session for a given data activity
+ * Initialize session for a given feedback activity
  *
- * @param [type] $id database activity ID
+ * @param [type] $id feedback activity ID
  * @return array
  */
 function feedback_pdf_init($id) {
@@ -112,7 +112,7 @@ function feedback_pdf_init($id) {
     $ids = explode(",", $id); // if this was a list, return the first entry
     $id = $ids[0];
 
-    $cm = get_coursemodule_from_id('data', $id);
+    $cm = get_coursemodule_from_id('feedback', $id);
     if (!$cm) {
         print_error('invalidcoursemodule');
     }
@@ -125,7 +125,7 @@ function feedback_pdf_init($id) {
     require_course_login($course, true, $cm);
 
     $context = context_module::instance($cm->id);
-    require_capability('mod/data:viewentry', $context);
+    require_capability('mod/feedback:view', $context);
     require_capability('local/feedback_pdf:view', $context);
 
     return [$cm, $course, $context];
@@ -134,7 +134,7 @@ function feedback_pdf_init($id) {
 /**
  * Get course data
  *
- * @param int $ids comma delimited list of data activity IDs
+ * @param int $ids comma delimited list of feedback activity IDs
  * @return array
  */
 function feedback_pdf_get_responses($ids)
@@ -149,14 +149,14 @@ function feedback_pdf_get_responses($ids)
         $PAGE = new moodle_page(); // reset moodle PAGE global
         list($cm, $course, $context) = feedback_pdf_init($id);
 
-        if (!$data = $DB->get_record('data', array('id' => $cm->instance))) {
+        if (!$feedback = $DB->get_record('feedback', array('id' => $cm->instance))) {
             print_error('invalidcoursemodule');
         }
 
         $search = '';
         $currentgroup = groups_get_activity_group($cm, true);
         list($records, $maxcount, $totalcount, $page, $nowperpage, $sort, $mode) = data_search_entries(
-            $data,
+            $feedback,
             $cm,
             $context,
             'single',         // $mode
@@ -182,9 +182,9 @@ function feedback_pdf_get_responses($ids)
             continue;
         }
 
-        $fieldrecords = $DB->get_records('data_fields', array('dataid'=>$data->id));
+        $fieldrecords = $DB->get_records('data_fields', array('dataid'=>$feedback->id));
         foreach ($fieldrecords as $fieldrecord) {
-            $field = data_get_field($fieldrecord, $data);
+            $field = data_get_field($fieldrecord, $feedback);
 
             if (empty($record)) {
                 $response = "";
@@ -207,9 +207,9 @@ function feedback_pdf_get_responses($ids)
         }
 
         $ret[] = array(
-            'data' => $data,
+            'feedback' => $feedback,
             'record' => $record,
-            'name' => $data->name,
+            'name' => $feedback->name,
             "details" => $details,
             'responses' => $responses
         );
