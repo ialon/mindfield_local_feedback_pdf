@@ -44,7 +44,7 @@ foreach ($responses as $act) {
         '<page_header>'.
             '<table>'.
             '<tr>'.
-                '<td><img src="' . $logourl . '" width="130"></td>'.
+                '<td>' . ($logourl ? '<img src="' . $logourl->out() . '" width="130">' : '') . '</td>'.
                 '<td><h3>'.$act['name'].'</h3>'.
                      $act['details'].
                 '</td>'.

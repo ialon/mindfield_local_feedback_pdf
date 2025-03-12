@@ -152,47 +152,38 @@ function feedback_pdf_get_responses($ids)
             print_error('invalidcoursemodule');
         }
 
-        $search = '';
-        $currentgroup = groups_get_activity_group($cm, true);
-        list($records, $maxcount, $totalcount, $page, $nowperpage, $sort, $mode) = data_search_entries(
-            $feedback,
-            $cm,
-            $context,
-            'single',         // $mode
-            $currentgroup,
-            $search,
-            DATA_TIMEADDED,   // $sort (DATA_TIMEMODIFIED / DATA_APPROVED)
-            'desc',           // $order
-            0,                // $page
-            0,                // $perpage
-            null,             // $advanced
-            null,             // $search_array
-            null              // $record
-        );
+        // Get feedback response
+        $params = array('userid' => $USER->id, 'feedback' => $feedback->id);
+        $record = $DB->get_record('feedback_completed', $params);
 
-        // adapted from mod/data/lib.php:data_print_template()
-        // data_print_template('singletemplate', $records, $data);
+        // Viewing individual response.
+        $feedbackstructure = new mod_feedback_completion($feedback, $cm, 0, true, $record->id, false);
+        $form = new mod_feedback_complete_form(mod_feedback_complete_form::MODE_VIEW_RESPONSE,
+        $feedbackstructure, 'feedback_viewresponse_form');
 
         $responses = array();
-        $record = array_pop($records);
 
         if ($multiactivity && empty($record)) {
             // don't append
             continue;
         }
 
-        $fieldrecords = $DB->get_records('data_fields', array('dataid'=>$feedback->id));
-        foreach ($fieldrecords as $fieldrecord) {
-            $field = data_get_field($fieldrecord, $feedback);
+        foreach ($feedbackstructure->get_items() as $key => $item) {
+            if (in_array($item->typ, array('label', 'captcha', 'pagebreak'))) {
+                continue;
+            }
 
-            if (empty($record)) {
-                $response = "";
+            $itemobj = feedback_get_item_class($item->typ);
+
+            if ($item->hasvalue) {
+                $value = $feedbackstructure->get_item_value($item);
+                $response = $itemobj->get_printval($item, (object) ['value' => $value]);
             } else {
-                $response = $field->display_browse_field($record->id, null);
+                $response = "";
             }
 
             $responses[] = array(
-                'q' => $field->field->description,
+                'q' => $itemobj->get_display_name($item),
                 'a' => $response
             );
         }
