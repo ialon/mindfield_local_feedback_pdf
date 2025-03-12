@@ -31,5 +31,5 @@ $plugin->maturity  = MATURITY_STABLE;
 $plugin->release   = "2.0";
 
 $plugin->dependencies = array(
-    'mod_data' => ANY_VERSION,
+    'mod_feedback' => ANY_VERSION,
 );

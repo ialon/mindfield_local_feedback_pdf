@@ -110,6 +110,4 @@ if ($mode == 'preview' || $mode == 'save') {
         );
     }
     echo html_writer::table($table, true);
-
-    echo $OUTPUT->footer();
 }

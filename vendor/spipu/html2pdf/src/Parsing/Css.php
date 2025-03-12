@@ -7,13 +7,14 @@
  *
  * @package   Html2pdf
  * @author    Laurent MINGUET <webmaster@html2pdf.fr>
- * @copyright 2017 Laurent MINGUET
+ * @copyright 2025 Laurent MINGUET
  */
 
 namespace Spipu\Html2Pdf\Parsing;
 
 use Spipu\Html2Pdf\CssConverter;
 use Spipu\Html2Pdf\MyPdf;
+use Spipu\Html2Pdf\Security\SecurityInterface;
 
 class Css
 {
@@ -28,8 +29,11 @@ class Css
     protected $cssConverter;
 
     /**
-     * Reference to the pdf object
-     *
+     * @var SecurityInterface
+     */
+    private $security;
+
+    /**
      * @var MyPdf
      */
     protected $pdf         = null;
@@ -43,18 +47,28 @@ class Css
     public $table        = array(); // level history
 
     /**
-     * Constructor
-     *
-     * @param MyPdf        $pdf reference to the PDF $object
-     * @param TagParser    $tagParser
+     * @param MyPdf $pdf
+     * @param TagParser $tagParser
      * @param CssConverter $cssConverter
+     * @param SecurityInterface $security
      */
-    public function __construct(&$pdf, TagParser $tagParser, CssConverter $cssConverter)
-    {
+    public function __construct(
+        MyPdf $pdf,
+        TagParser $tagParser,
+        CssConverter $cssConverter,
+        SecurityInterface $security
+    ) {
+        $this->setSecurityService($security);
         $this->cssConverter = $cssConverter;
         $this->init();
         $this->setPdfParent($pdf);
         $this->tagParser = $tagParser;
+    }
+
+    public function setSecurityService(SecurityInterface $security): self
+    {
+        $this->security = $security;
+        return $this;
     }
 
     /**
@@ -93,7 +107,7 @@ class Css
    /**
     * Define the Default Font to use, if the font does not exist, or if no font asked
     *
-    * @param string  default font-family. If null : Arial for no font asked, and error fot ont does not exist
+    * @param string $default default font-family. If null : Arial for no font asked, and error fot ont does not exist
     *
     * @return string  old default font-family
     */
@@ -195,7 +209,7 @@ class Css
      */
     public function resetStyle($tagName = '')
     {
-        // prepare somme values
+        // prepare some values
         $border = $this->readBorder('solid 1px #000000');
         $units = array(
             '1px' => $this->cssConverter->convertToMM('1px'),
@@ -536,7 +550,7 @@ class Css
         $class = array();
         $tmp = isset($param['class']) ? strtolower(trim($param['class'])) : '';
         $tmp = explode(' ', $tmp);
-        foreach ($tmp as $k => $v) {
+        foreach ($tmp as $v) {
             $v = trim($v);
             if ($v) {
                 $class[] = $v;
@@ -606,7 +620,7 @@ class Css
      */
     public function analyse($tagName, &$param, $legacy = null)
     {
-        // prepare the informations
+        // prepare the information
         $tagName = strtolower($tagName);
         $id   = isset($param['id'])   ? strtolower(trim($param['id']))    : null;
         if (!$id) {
@@ -621,8 +635,17 @@ class Css
         $class = array();
         $tmp = isset($param['class']) ? strtolower(trim($param['class'])) : '';
         $tmp = explode(' ', $tmp);
-        foreach ($tmp as $k => $v) {
+        
+        // replace some values
+        $toReplace = array(
+            '[[page_cu]]' => $this->pdf->getMyNumPage()
+        );
+        
+        foreach ($tmp as $v) {
             $v = trim($v);
+            if (strlen($v)>0) {
+                $v = str_replace(array_keys($toReplace), array_values($toReplace), $v);
+            }
             if ($v) {
                 $class[] = $v;
             }
@@ -1652,7 +1675,7 @@ class Css
             }
         }
 
-        // get he list of the keys
+        // get the list of the keys
         $this->cssKeys = array_flip(array_keys($this->css));
     }
 
@@ -1681,9 +1704,10 @@ class Css
             if (isset($tmp['type']) && strtolower($tmp['type']) === 'text/css' && isset($tmp['href'])) {
 
                 // get the href
-                $url = $tmp['href'];
+                $url = (string) $tmp['href'];
 
                 // get the content of the css file
+                $this->security->checkValidPath($url);
                 $content = @file_get_contents($url);
 
                 // if "http://" in the url

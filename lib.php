@@ -61,7 +61,6 @@ function feedback_pdf_generate_pdf($responses)
  */
 function feedback_pdf_send_pdf($filename, $type, $pdffile)
 {
-    ob_clean();
     header("Content-type: application/pdf");
     header('Content-Disposition: inline; filename="'.$filename.'"');
     header('Expires: 0');

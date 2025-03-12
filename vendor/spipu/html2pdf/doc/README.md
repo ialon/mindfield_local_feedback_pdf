@@ -16,10 +16,12 @@
   * [Exceptions](./exception.md)
   * [Useful Methods](./methods.md)
   * [Tcpdf Methods](./tcpdf_methods.md)
+  * [Security / Blind SSRF](./security.md)
 
 ## Recommandations
    
   * It is very important to provide valid HTML 4.01 to the converter, but only what is in the `<body>`.
+  * You have to write specific cleaned HTML code for Html2Pdf. Do not try to convert directly an already existing html page, or HTML code coming from WYSIWYG, no help will be provided in this case.
   * Use the `<page>` tag. Does not use the `<html>` or `<body>` tag.
   * for borders: it is advised that they are like `solid 1mm #000000`
   * for padding, they are applicable only on tags `table`, `th`, `td`, `div`, `li`
@@ -33,7 +35,7 @@
   * A DEBUG mode to know the resources used is present. It is activated by adding the following command just after the contructor (see Example 0): `$html2pdf->setModeDebug();`
   * Some specific tags have been introduced:
   
-     * `<page></page>`  (CF Exemple 7)
+     * `<page></page>`  (CF Example 7)
     
         * Determines the orientation, margins left, right, top and bottom, the background image and the background color of a page, its size and position, the footer.
         * It is also possible to keep the header and footer of the previous pages, through the attribut `pageset="old"` (see Example 3 & 4)
@@ -47,8 +49,8 @@
 
      * `<barcode></barcode>`  (CF Examples 0 & 9)
     
-        * Can insert barcodes in pdfs, CF Examples 0 and 9
-        * the possible types of codebar are alls of TCPDF
+        * Can insert barcodes in pdfs, CF Examples 0 and 9.
+        * the possible types of codebar are alls of TCPDF.
 
      * `<qrcode></qrcode>` (CF Example 13)
     
