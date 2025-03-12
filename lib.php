@@ -17,13 +17,13 @@
 /**
  * Version information
  *
- * @package   local_cpsopdf
+ * @package   local_feedback_pdf
  * @copyright Mindfield Consulting
  * @license   Commercial
  */
 
 defined('MOODLE_INTERNAL') || die();
-define("CPSOPDF_TIMEFORMAT", "M d, y h:iA");
+define("FEEDBACK_PDF_TIMEFORMAT", "M d, y h:iA");
 
 require_once(dirname(__FILE__) . '/../../config.php');
 
@@ -33,7 +33,7 @@ require_once(dirname(__FILE__) . '/../../config.php');
  * @param string $str
  * @return string
  */
-function cpsopdf_format_string($str)
+function feedback_pdf_format_string($str)
 {
     return strip_tags($str, '<b>,<i>,<br>');
 }
@@ -44,7 +44,7 @@ function cpsopdf_format_string($str)
  * @param array $responses
  * @return string Internal filename of generated PDF
  */
-function cpsopdf_generate_pdf($responses)
+function feedback_pdf_generate_pdf($responses)
 {
     require('generatepdf.php');
     return $pdffile;
@@ -58,7 +58,7 @@ function cpsopdf_generate_pdf($responses)
  * @param string $pdffile
  * @return void
  */
-function cpsopdf_send_pdf($filename, $type, $pdffile)
+function feedback_pdf_send_pdf($filename, $type, $pdffile)
 {
     ob_clean();
     header("Content-type: application/pdf");
@@ -82,7 +82,7 @@ function cpsopdf_send_pdf($filename, $type, $pdffile)
  * @param string $pdffile
  * @return int
  */
-function cpsopdf_save_pdf($responses, $userid, $pdffile, $filename)
+function feedback_pdf_save_pdf($responses, $userid, $pdffile, $filename)
 {
     global $DB;
 
@@ -95,7 +95,7 @@ function cpsopdf_save_pdf($responses, $userid, $pdffile, $filename)
     $rec->filename = $filename;
     $rec->data = file_get_contents($pdffile);
 
-    return $DB->insert_record('cpsopdf', $rec);
+    return $DB->insert_record('feedback_pdf', $rec);
 }
 
 /**
@@ -104,7 +104,7 @@ function cpsopdf_save_pdf($responses, $userid, $pdffile, $filename)
  * @param [type] $id database activity ID
  * @return array
  */
-function cpsopdf_init($id) {
+function feedback_pdf_init($id) {
     global $DB;
 
     $ids = explode(",", $id); // if this was a list, return the first entry
@@ -124,7 +124,7 @@ function cpsopdf_init($id) {
 
     $context = context_module::instance($cm->id);
     require_capability('mod/data:viewentry', $context);
-    require_capability('local/cpsopdf:view', $context);
+    require_capability('local/feedback_pdf:view', $context);
 
     return [$cm, $course, $context];
 }
@@ -135,7 +135,7 @@ function cpsopdf_init($id) {
  * @param int $ids comma delimited list of data activity IDs
  * @return array
  */
-function cpsopdf_get_data_responses($ids)
+function feedback_pdf_get_data_responses($ids)
 {
     global $DB, $USER, $PAGE;
 
@@ -145,7 +145,7 @@ function cpsopdf_get_data_responses($ids)
 
     foreach ($ids as $id) {
         $PAGE = new moodle_page(); // reset moodle PAGE global
-        list($cm, $course, $context) = cpsopdf_init($id);
+        list($cm, $course, $context) = feedback_pdf_init($id);
 
         if (!$data = $DB->get_record('data', array('id' => $cm->instance))) {
             print_error('invalidcoursemodule');
@@ -200,7 +200,7 @@ function cpsopdf_get_data_responses($ids)
             $details = "Incomplete";
         } else {
             $record->timecreated = time();
-            $date = date(CPSOPDF_TIMEFORMAT, $record->timecreated);
+            $date = date(FEEDBACK_PDF_TIMEFORMAT, $record->timecreated);
             $details = "Completed by {$USER->firstname} {$USER->lastname} on {$date}";
         }
 

@@ -17,7 +17,7 @@
 /**
  * Version information
  *
- * @package   local_cpsopdf
+ * @package   local_feedback_pdf
  * @copyright Mindfield Consulting
  * @license   Commercial
  */
@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->version   = 2020010000;
 $plugin->requires  = 2019052000;
-$plugin->component = 'local_cpsopdf';
+$plugin->component = 'local_feedback_pdf';
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->release   = "2.0";
 

@@ -17,7 +17,7 @@
 /**
  * Version information
  *
- * @package   local_cpsopdf
+ * @package   local_feedback_pdf
  * @copyright Mindfield Consulting
  * @license   Commercial
  */
@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
-    'local/cpsopdf:view' => array(
+    'local/feedback_pdf:view' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/cpsopdf/db" VERSION="20190801" COMMENT="XMLDB file for Moodle local/cpsopdf"
+<XMLDB PATH="local/feedback_pdf/db" VERSION="20190801" COMMENT="XMLDB file for Moodle local/feedback_pdf"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="cpsopdf" COMMENT="CPSO PDFs">
+    <TABLE NAME="feedback_pdf" COMMENT="Feedback PDF">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="dataid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

@@ -3,20 +3,20 @@
  */
 var autosaveEvery = 2 * (60 * 1000);
 var autosaveTimer = false;
-var autosaveEndpoint = '/local/cpsopdf/autosave/autosave.php';
+var autosaveEndpoint = '/local/feedback_pdf/autosave/autosave.php';
 
-function cpsoDelete() {
+function feedbackpdfDelete() {
     console.log('Autosave clearing responses');
     var params = {
         mode: 'delete',
-        entityid: cpso_autosave_entityid
+        entityid: feedbackpdf_autosave_entityid
     };
     $.post(autosaveEndpoint, params, function (data) {
         // delete
     }, 'json');
 }
 
-function cpsoSerialize($frm) {
+function feedbackpdfSerialize($frm) {
     var data = {};
     $('div.editor_atto_content', $frm).each(function () {
         data[$(this).attr('id')] = $(this).html();
@@ -35,7 +35,7 @@ function cpsoSerialize($frm) {
     return data;
 }
 
-function cpsoPopulate($frm, data) {
+function feedbackpdfPopulate($frm, data) {
     console.log('Autosave restoring responses');
     $.each($(':input', $frm).get(), function () {
         $('div.editor_atto_content', $frm).each(function () {
@@ -67,21 +67,21 @@ function cpsoPopulate($frm, data) {
     });
 }
 
-function cpsoAutosave($frm, dosave) {
+function feedbackpdfAutosave($frm, dosave) {
     if (dosave) {
         var params = {
             mode: 'save',
-            entityid: cpso_autosave_entityid,
-            data: cpsoSerialize($frm)
+            entityid: feedbackpdf_autosave_entityid,
+            data: feedbackpdfSerialize($frm)
         };
         $.post(autosaveEndpoint, params, function (data) {
             console.log('Autosaved saving ', new Date());
-            $('div.usermenu').after('<div id="cpsoAutosaveMsg" style="position:absolute;right:10px;top:55px;background-color:red;color:white;padding:5px">...autosave...</div>');
-            setTimeout(function () { $('#cpsoAutosaveMsg').remove() }, 2 * 1000);
+            $('div.usermenu').after('<div id="feedbackpdfAutosaveMsg" style="position:absolute;right:10px;top:55px;background-color:red;color:white;padding:5px">...autosave...</div>');
+            setTimeout(function () { $('#feedbackpdfAutosaveMsg').remove() }, 2 * 1000);
         }, 'json');
     }
 
-    autosaveTimer = setTimeout(function () { cpsoAutosave($frm, true) }, autosaveEvery);
+    autosaveTimer = setTimeout(function () { feedbackpdfAutosave($frm, true) }, autosaveEvery);
 }
 
 document.onreadystatechange = function () {
@@ -96,22 +96,22 @@ document.onreadystatechange = function () {
                 console.log('Autosave enabled');
                 var params = {
                     mode: 'load',
-                    entityid: cpso_autosave_entityid
+                    entityid: feedbackpdf_autosave_entityid
                 };
                 $.post(autosaveEndpoint, params, function (data) {
                     if (data.success) {
                         console.log('Autosave initialized');
                         if (confirm('Reload unsaved responses from ' + data.timecreated + '? If you select "Cancel", please be advised that data from your last session will not be saved.')) {
-                            cpsoPopulate($frm, data.data);
+                            feedbackpdfPopulate($frm, data.data);
                         } else {
-                            cpsoDelete();
+                            feedbackpdfDelete();
                         }
                     }
 
-                    cpsoAutosave($frm, false);
+                    feedbackpdfAutosave($frm, false);
 
                     $frm.submit(function () {
-                        cpsoDelete();
+                        feedbackpdfDelete();
                         if (autosaveTimer) clearTimeout(autosaveTimer);
                     });
 

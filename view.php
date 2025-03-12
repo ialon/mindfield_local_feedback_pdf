@@ -17,7 +17,7 @@
 /**
  * Version information
  *
- * @package   local_cpsopdf
+ * @package   local_feedback_pdf
  * @copyright Mindfield Consulting
  * @license   Commercial
  */
@@ -37,12 +37,12 @@ if ($mode == 'preview' || $mode == 'save') {
     $id         = required_param('id', PARAM_SEQUENCE);      // IDs of exercise activities
     $activityid = required_param('activityid', PARAM_INT);   // ID of this activity (to mark completion against)
 
-    $responses  = cpsopdf_get_data_responses($id);
-    $pdffile    = cpsopdf_generate_pdf($responses);
-    $filename   = "CPSO Report {$responses[0]['name']}.pdf";
+    $responses  = feedback_pdf_get_data_responses($id);
+    $pdffile    = feedback_pdf_generate_pdf($responses);
+    $filename   = "Feedback PDF Report {$responses[0]['name']}.pdf";
 
     if ($mode == 'save') {
-        cpsopdf_save_pdf($responses, $USER->id, $pdffile, $filename);
+        feedback_pdf_save_pdf($responses, $USER->id, $pdffile, $filename);
 
         // mark activity as complete
         $cm = get_coursemodule_from_id('url', $activityid);
@@ -54,7 +54,7 @@ if ($mode == 'preview' || $mode == 'save') {
         redirect(new moodle_url('/course/view.php', array('id'=>$cm->course)), $message);
     }
 
-    cpsopdf_send_pdf($filename, 'file', $pdffile);
+    feedback_pdf_send_pdf($filename, 'file', $pdffile);
     die;
 
 /****************************************************************************/
@@ -66,7 +66,7 @@ if ($mode == 'preview' || $mode == 'save') {
     $savelabel  = ($submit == 1) ? 'Save &amp; Submit' : 'Save';
     $saveprompt = ($submit == 1) ? 'Save &amp; submit results to your permanent record?' : 'Save results to your permanent record?';
 
-    list($cm, $course, $context) = cpsopdf_init($id);
+    list($cm, $course, $context) = feedback_pdf_init($id);
     $course->format = course_get_format($course)->get_format();
     $title = $course->fullname." Report";
 
@@ -78,8 +78,8 @@ if ($mode == 'preview' || $mode == 'save') {
     echo $OUTPUT->header();
     echo $OUTPUT->heading("Exercise Results");
 
-    $myurl = new moodle_url('/local/cpsopdf/view.php', array('id'=>$id, 'activityid'=>$activityid));
-    $responses = cpsopdf_get_data_responses($id);
+    $myurl = new moodle_url('/local/feedback_pdf/view.php', array('id'=>$id, 'activityid'=>$activityid));
+    $responses = feedback_pdf_get_data_responses($id);
 
     $table = new html_table();
     $table->head = array('',  'Action');
@@ -94,20 +94,20 @@ if ($mode == 'preview' || $mode == 'save') {
     };
     echo html_writer::table($table, true);
 
-    $docurl = new moodle_url('/local/cpsopdf/document.php');
+    $docurl = new moodle_url('/local/feedback_pdf/document.php');
     $table = new html_table();
     $table->head = array('Saved Documents', 'Date', 'Download');
     $table->align = array("left", "left", "right");
     $table->data = array();
     $dataid = $responses[0]['data']->id;
-    $dbrecs = $DB->get_records('cpsopdf', array('userid'=>$USER->id, 'dataid'=>$dataid), 'id desc', 'id, name, timecreated');
+    $dbrecs = $DB->get_records('feedback_pdf', array('userid'=>$USER->id, 'dataid'=>$dataid), 'id desc', 'id, name, timecreated');
     foreach ($dbrecs as $rec) {
         $pdfurl = $docurl.'?id='.$rec->id;
         $table->data[] =  array(
             '<a target="_new" href="'.$pdfurl.'">'
                 .' '.htmlEntities($rec->name)
                 .'</a>',
-            date(CPSOPDF_TIMEFORMAT, $rec->timecreated),
+            date(FEEDBACK_PDF_TIMEFORMAT, $rec->timecreated),
             '<a target="_new" href="'.$pdfurl.'">'
                 .$OUTPUT->pix_icon('i/export', 'Download')
                 .'</a>'

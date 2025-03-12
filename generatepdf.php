@@ -17,7 +17,7 @@
 /**
  * Version information
  *
- * @package   local_cpsopdf
+ * @package   local_feedback_pdf
  * @copyright Mindfield Consulting
  * @license   Commercial
  */
@@ -28,9 +28,13 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Spipu\Html2Pdf\Html2Pdf;
 
+global $OUTPUT;
+
 $color1 = '#0FA0AE'; // Web Teal
 $color2 = '#01838D'; // Web Teal Dark
 $color3 = '#CC4030'; // Orange
+
+$logourl = $OUTPUT->get_logo_url(288);
 
 $html = "";
 
@@ -40,7 +44,7 @@ foreach ($responses as $act) {
         '<page_header>'.
             '<table>'.
             '<tr>'.
-                '<td><img src="logo.png" width="130"></td>'.
+                '<td><img src="' . $loogurl . '" width="130"></td>'.
                 '<td><h3>'.$act['name'].'</h3>'.
                      $act['details'].
                 '</td>'.
@@ -72,7 +76,7 @@ foreach ($responses as $act) {
     $html .= '</page>';
 }
 
-$pdffile = tempnam('', 'cpso').".pdf";
+$pdffile = tempnam('', 'feedbackpdf').".pdf";
 $pdf = new \Spipu\Html2Pdf\Html2Pdf('P', 'Letter', 'en', true, 'UTF-8', array(7, 7, 7, 7));
 $pdf->writeHTML($html);
 $pdf->output($pdffile, 'F');

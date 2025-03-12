@@ -15,12 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   local_cpsopdf
+ * @package   local_feedback_pdf
  * @copyright Mindfield Consulting
  * @license   Commercial
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'CPSO PDF Plugin';
-$string['cpsopdf:view'] = 'CPSO View PDF';
+$string['pluginname'] = 'Feedback PDF';
+$string['feedback_pdf:view'] = 'View Feedback PDF';

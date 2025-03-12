@@ -17,7 +17,7 @@
 /**
  * Version information
  *
- * @package   local_cpsopdf
+ * @package   local_feedback_pdf
  * @copyright Mindfield Consulting
  * @license   Commercial
  */
@@ -31,25 +31,25 @@ require_login();
 $id = optional_param('id', 0, PARAM_INT);
 
 $PAGE->set_context(context_system::instance());
-$PAGE->set_url(new moodle_url('/local/cpsopdf/document.php'));
+$PAGE->set_url(new moodle_url('/local/feedback_pdf/document.php'));
 $PAGE->set_pagelayout('frontpage');
 $PAGE->set_cacheable(false);
 
 /****************************************************************************/
 if ($id) {
 /****************************************************************************/
-    $rec = $DB->get_record('cpsopdf', ['id'=>$id, 'userid'=>$USER->id]);
+    $rec = $DB->get_record('feedback_pdf', ['id'=>$id, 'userid'=>$USER->id]);
 	// if that doesn't work, check
 	if (!$rec) {		
 		$rec = $DB->get_record_sql('SELECT * FROM {role_assignments} roa INNER JOIN {role} rol ON roa.roleid = rol.id AND rol.shortname in (\'mars_advisor\',\'mars_admin\') WHERE roa.userid = ?', [$USER->id]);
 		if ($rec) {
 			// authorized so pull up the pdf record again w/out userid
-			$rec = $DB->get_record('cpsopdf', ['id'=>$id]);
+			$rec = $DB->get_record('feedback_pdf', ['id'=>$id]);
 		}
 	}
 	// we should have the record now, if not, we're not authorized.
     if ($rec) {
-        cpsopdf_send_pdf($rec->filename, 'string', $rec->data);
+        feedback_pdf_send_pdf($rec->filename, 'string', $rec->data);
     } else {
 		print_error('filenotfound');
     }
@@ -69,7 +69,7 @@ if ($id) {
     $table->align = array("left", "left", "right");
     $table->data = array();
 
-    $dbrecs = $DB->get_records('cpsopdf', array('userid'=>$USER->id), 'id desc', 'id, recordid, name, timecreated');
+    $dbrecs = $DB->get_records('feedback_pdf', array('userid'=>$USER->id), 'id desc', 'id, recordid, name, timecreated');
     foreach ($dbrecs as $rec) {
         $displayed[$rec->recordid] = $rec->id;
 
@@ -78,7 +78,7 @@ if ($id) {
             '<a target="_new" href="'.$pdfurl.'">'
                 .' '.htmlEntities($rec->name)
                 .'</a>',
-            date(CPSOPDF_TIMEFORMAT, $rec->timecreated),
+            date(FEEDBACK_PDF_TIMEFORMAT, $rec->timecreated),
             '<a target="_new" href="'.$pdfurl.'">'
                 .$OUTPUT->pix_icon('i/export', 'Download')
                 .'</a>'

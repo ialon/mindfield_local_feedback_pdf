@@ -17,7 +17,7 @@
 /**
  * Version information
  *
- * @package   local_cpsopdf
+ * @package   local_feedback_pdf
  * @copyright Mindfield Consulting
  * @license   Commercial
  */
@@ -25,27 +25,27 @@
 /*
 Add this to the Javascript Template of the Database Activity:
 -------------------------------------------------------------
-var cpso_autosave_entityid = 58;
-var cpso_autosave_js = document.createElement("script");
-cpso_autosave_js.src = '/local/cpsopdf/autosave/autosave.js';
-document.head.appendChild(cpso_autosave_js);
+var feedbackpdf_autosave_entityid = 58;
+var feedbackpdf_autosave_js = document.createElement("script");
+feedbackpdf_autosave_js.src = '/local/feedback_pdf/autosave/autosave.js';
+document.head.appendChild(feedbackpdf_autosave_js);
 
 Add this table/index to the database:
 -------------------------------------------------------------
-CREATE TABLE [cpsomoodle].[mdl_cpsoautosave](
+CREATE TABLE [feedbackpdfmoodle].[mdl_feedbackpdfautosave](
 	[id] [bigint] IDENTITY(1,1) NOT NULL,
 	[entityid] [bigint] NOT NULL,
 	[userid] [bigint] NOT NULL,
 	[timecreated] [bigint] NOT NULL,
 	[data] [nvarchar](max) NOT NULL,
- CONSTRAINT [PK_mdl_cpsoautosave] PRIMARY KEY CLUSTERED
+ CONSTRAINT [PK_mdl_feedbackpdfautosave] PRIMARY KEY CLUSTERED
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
-CREATE UNIQUE NONCLUSTERED INDEX [IX_mdl_cpsoautosave] ON [cpsomoodle].[mdl_cpsoautosave]
+CREATE UNIQUE NONCLUSTERED INDEX [IX_mdl_feedbackpdfautosave] ON [feedbackpdfmoodle].[mdl_feedbackpdfautosave]
 (
 	[entityid] ASC,
 	[userid] ASC
@@ -70,7 +70,7 @@ $cond = ['entityid'=>$entityid, 'userid'=>$USER->id];
 /****************************************************************************/
 if ($mode == 'load') {
 /****************************************************************************/
-    $rec = $DB->get_record('cpsoautosave', $cond, 'timecreated, data');
+    $rec = $DB->get_record('feedbackpdfautosave', $cond, 'timecreated, data');
     if (empty($rec)) {
         die(json_encode([
             "success" => false
@@ -95,11 +95,11 @@ if ($mode == 'load') {
     }
 
     $data = json_encode($data);
-    $rec = $DB->get_record('cpsoautosave', $cond);
+    $rec = $DB->get_record('feedbackpdfautosave', $cond);
     if (@$rec->id) {
         $rec->timecreated = time();
         $rec->data = $data;
-        $DB->update_record('cpsoautosave', $rec);
+        $DB->update_record('feedbackpdfautosave', $rec);
 
     } else {
         $rec = new stdClass();
@@ -107,7 +107,7 @@ if ($mode == 'load') {
         $rec->userid = $USER->id;
         $rec->timecreated = time();
         $rec->data = $data;
-        $DB->insert_record('cpsoautosave', $rec);
+        $DB->insert_record('feedbackpdfautosave', $rec);
     }
 
     die(json_encode([
@@ -117,7 +117,7 @@ if ($mode == 'load') {
 /****************************************************************************/
 } elseif ($mode == 'delete') {
 /****************************************************************************/
-    $DB->delete_records('cpsoautosave', $cond);
+    $DB->delete_records('feedbackpdfautosave', $cond);
     die(json_encode([
         "success" => true
     ]));

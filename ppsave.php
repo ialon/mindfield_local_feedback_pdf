@@ -17,7 +17,7 @@
 /**
  * Version information
  *
- * @package   local_cpsopdf
+ * @package   local_feedback_pdf
  * @copyright Mindfield Consulting
  * @license   Commercial
  */
@@ -50,7 +50,7 @@ $rec->timecreated = time();
 $rec->filename = 'Practice Profile Report.pdf';
 $rec->data = file_get_contents($file['tmp_name']);
 
-$id = $DB->insert_record('cpsopdf', $rec);
+$id = $DB->insert_record('feedback_pdf', $rec);
 
 die(json_encode([
     "success" => true,
