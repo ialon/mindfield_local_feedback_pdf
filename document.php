@@ -40,12 +40,11 @@ if ($id) {
 /****************************************************************************/
     $rec = $DB->get_record('feedback_pdf', ['id'=>$id, 'userid'=>$USER->id]);
 	// if that doesn't work, check
-	if (!$rec) {		
-		$rec = $DB->get_record_sql('SELECT * FROM {role_assignments} roa INNER JOIN {role} rol ON roa.roleid = rol.id AND rol.shortname in (\'mars_advisor\',\'mars_admin\') WHERE roa.userid = ?', [$USER->id]);
-		if ($rec) {
+	if (!$rec) {
+        if (is_siteadmin()) {
 			// authorized so pull up the pdf record again w/out userid
 			$rec = $DB->get_record('feedback_pdf', ['id'=>$id]);
-		}
+        }
 	}
 	// we should have the record now, if not, we're not authorized.
     if ($rec) {
