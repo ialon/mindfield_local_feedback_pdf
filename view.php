@@ -15,23 +15,47 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * The first page to view the feedback PDF
  *
  * @package   local_feedback_pdf
  * @copyright Mindfield Consulting
  * @license   Commercial
  */
-
-require_once(dirname(__FILE__) . '/../../config.php');
-require_once('lib.php');
-
-require_login();
+require_once(__DIR__ . '/../../config.php');
+require_once($CFG->dirroot . '/local/feedback_pdf/lib.php');
 
 $mode   = optional_param('mode', '', PARAM_ALPHA);
 $submit = optional_param('submit', 0, PARAM_INT);
 
 $id         = required_param('id', PARAM_SEQUENCE);      // IDs of exercise activities
-$activityid = required_param('activityid', PARAM_INT);   // ID of this activity (to mark completion against)
+$activityid = required_param('activityid', PARAM_INT);   // ID of this activity
+
+$ids = explode(",", $id); // if this was a list, return the first entry
+list($course, $cm) = get_course_and_cm_from_cmid($ids[0], 'feedback');
+require_course_login($course, true, $cm);
+$feedback = $PAGE->activityrecord;
+
+$feedbackcompletion = new mod_feedback_completion($feedback, $cm, $course->id);
+
+$context = context_module::instance($cm->id);
+
+if ($course->id == SITEID) {
+    $PAGE->set_pagelayout('incourse');
+}
+$PAGE->set_url('/local/feedback_pdf/view.php', array('id' => $id, 'activityid' => $cm->id));
+$PAGE->set_title($feedback->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->add_body_class('limitedwidth');
+
+// Check access to the given courseid.
+if ($course->id AND $course->id != SITEID) {
+    require_course_login(get_course($course->id)); // This overwrites the object $COURSE .
+}
+
+require_capability('mod/feedback:view', $context);
+require_capability('local/feedback_pdf:view', $context);
+
+$PAGE->activityheader->set_description("");
 
 /****************************************************************************/
 if ($mode == 'preview' || $mode == 'save') {
@@ -62,15 +86,7 @@ if ($mode == 'preview' || $mode == 'save') {
     $savelabel  = ($submit == 1) ? 'Save &amp; Submit' : 'Save';
     $saveprompt = ($submit == 1) ? 'Save &amp; submit results to your permanent record?' : 'Save results to your permanent record?';
 
-    list($cm, $course, $context) = feedback_pdf_init($id);
-    $course->format = course_get_format($course)->get_format();
-    $title = $course->fullname." Report";
-
-    $PAGE->set_url(new moodle_url('/course/view.php', array('id'=>$course->id)));
-    $PAGE->set_cacheable(false);
-    $PAGE->set_title($title);
-    $PAGE->set_heading($title);
-
+    // Print the page header.
     echo $OUTPUT->header();
     echo $OUTPUT->heading("Exercise Results");
 
@@ -111,3 +127,5 @@ if ($mode == 'preview' || $mode == 'save') {
     }
     echo html_writer::table($table, true);
 }
+
+echo $OUTPUT->footer();

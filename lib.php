@@ -100,37 +100,6 @@ function feedback_pdf_save_pdf($responses, $userid, $pdffile, $filename)
 }
 
 /**
- * Initialize session for a given feedback activity
- *
- * @param [type] $id feedback activity ID
- * @return array
- */
-function feedback_pdf_init($id) {
-    global $DB;
-
-    $ids = explode(",", $id); // if this was a list, return the first entry
-    $id = $ids[0];
-
-    $cm = get_coursemodule_from_id('feedback', $id);
-    if (!$cm) {
-        print_error('invalidcoursemodule');
-    }
-
-    $course = $DB->get_record('course', array('id' => $cm->course));
-    if (!$course) {
-        print_error('coursemisconf');
-    }
-
-    require_course_login($course, true, $cm);
-
-    $context = context_module::instance($cm->id);
-    require_capability('mod/feedback:view', $context);
-    require_capability('local/feedback_pdf:view', $context);
-
-    return [$cm, $course, $context];
-}
-
-/**
  * Get course data
  *
  * @param int $ids comma delimited list of feedback activity IDs
@@ -145,8 +114,9 @@ function feedback_pdf_get_responses($ids)
     $multiactivity = count($ids) > 1;
 
     foreach ($ids as $id) {
-        $PAGE = new moodle_page(); // reset moodle PAGE global
-        list($cm, $course, $context) = feedback_pdf_init($id);
+        $cm = get_coursemodule_from_id('feedback', $id);
+        $context = context_module::instance($cm->id);
+        $PAGE->set_context($context);
 
         if (!$feedback = $DB->get_record('feedback', array('id' => $cm->instance))) {
             print_error('invalidcoursemodule');
