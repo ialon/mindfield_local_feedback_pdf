@@ -23,12 +23,15 @@
  */
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->dirroot . '/local/feedback_pdf/lib.php');
+require_once($CFG->dirroot . '/mod/assign/locallib.php');
+require_once($CFG->dirroot . '/mod/assign/submission/file/locallib.php');
 
 $mode   = optional_param('mode', '', PARAM_ALPHA);
 $submit = optional_param('submit', 0, PARAM_INT);
 
 $id         = required_param('id', PARAM_SEQUENCE);      // IDs of exercise activities
 $activityid = required_param('activityid', PARAM_INT);   // ID of this activity
+$assignid   = optional_param('assign', 0, PARAM_INT);   // ID of this activity
 
 $ids = explode(",", $id); // if this was a list, return the first entry
 list($course, $cm) = get_course_and_cm_from_cmid($ids[0], 'feedback');
@@ -42,7 +45,7 @@ $context = context_module::instance($cm->id);
 if ($course->id == SITEID) {
     $PAGE->set_pagelayout('incourse');
 }
-$PAGE->set_url('/local/feedback_pdf/view.php', array('id' => $id, 'activityid' => $cm->id));
+$PAGE->set_url('/local/feedback_pdf/view.php', array('id' => $id, 'activityid' => $cm->id, 'assign' => $assignid));
 $PAGE->set_title($feedback->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->add_body_class('limitedwidth');
@@ -65,6 +68,9 @@ if ($mode == 'preview' || $mode == 'save') {
     $filename   = "Feedback PDF Report {$responses[0]['name']}.pdf";
 
     if ($mode == 'save') {
+        if ($assignid) {
+            feedback_pdf_submit_pdf($assignid, $USER->id, $pdffile, $filename);
+        }
         feedback_pdf_save_pdf($responses, $USER->id, $pdffile, $filename);
 
         // mark activity as complete
@@ -90,7 +96,7 @@ if ($mode == 'preview' || $mode == 'save') {
     echo $OUTPUT->header();
     echo $OUTPUT->heading("Exercise Results");
 
-    $myurl = new moodle_url('/local/feedback_pdf/view.php', array('id'=>$id, 'activityid'=>$activityid));
+    $myurl = new moodle_url('/local/feedback_pdf/view.php', array('id'=>$id, 'activityid'=>$activityid, 'assign'=>$assignid));
     $responses = feedback_pdf_get_responses($id);
 
     $table = new html_table();

@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 define("FEEDBACK_PDF_TIMEFORMAT", "M d, y h:iA");
 
 require_once(dirname(__FILE__) . '/../../config.php');
+require_once($CFG->dirroot . '/lib/completionlib.php');
 
 /**
  * Strips extra HTML from string
@@ -97,6 +98,58 @@ function feedback_pdf_save_pdf($responses, $userid, $pdffile, $filename)
     $rec->data = file_get_contents($pdffile);
 
     return $DB->insert_record('feedback_pdf', $rec);
+}
+
+/**
+ * Submits a PDF file as an assignment submission for a specific user.
+ *
+ * @param int $assignid The ID of the assignment.
+ * @param int $userid The ID of the user submitting the PDF.
+ * @param string $pdffile The PDF file to be submitted.
+ * @param string $filename The name of the PDF file to be saved.
+ */
+function feedback_pdf_submit_pdf($assignid, $userid, $pdffile, $filename) {
+    global $DB;
+
+    list($course, $assignment) = get_course_and_cm_from_cmid($assignid, 'assign');
+    $context = context_module::instance($assignment->id);
+    $assign = new assign($context, $assignment, $course);
+
+    // Create a file submission with the pdf.
+    $submission = $assign->get_user_submission($userid, true);
+    $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
+    $submission->timemodified = time();
+    $DB->update_record('assign_submission', $submission);
+
+    $fs = get_file_storage();
+    $filerecord = array(
+        'contextid' => $assign->get_context()->id,
+        'component' => 'assignsubmission_file',
+        'filearea' => ASSIGNSUBMISSION_FILE_FILEAREA,
+        'itemid' => $submission->id,
+        'filepath' => '/',
+        'filename' => $filename
+    );
+    $content = file_get_contents($pdffile);
+
+    // Delete the file if it already exists.
+    if ($existingfile = $fs->get_file(...array_values($filerecord))) {
+        $existingfile->delete();
+    }
+
+    // Create the new file.
+    $fs->create_file_from_string((object) $filerecord, $content);
+
+    /** @var \assign_submission_file $plugin */
+    $plugin = $assign->get_submission_plugin_by_type('file');
+    $plugin->save($submission, (object) []);
+
+    // Mark the assignment as complete.
+    $instance = $assign->get_instance();
+    $completion = new completion_info($assign->get_course());
+    if ($completion->is_enabled($assign->get_course_module()) && $instance->completionsubmit) {
+        $completion->update_state($assign->get_course_module(), COMPLETION_COMPLETE, $userid);
+    }
 }
 
 /**
